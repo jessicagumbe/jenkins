@@ -4,8 +4,8 @@ pipeline {
       stage('Build') {
          steps {
             // Get some code from a GitHub repository
-            git 'https://github.com/jessicagumbe/jenkins.git'
-            bat "mvn -Dmaven.test.failure.ignore=true clean compile"
+            checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'developer_github', url: 'https://github.com/jessicagumbe/jenkins']])
+            bat 'mvn clean install -DskipTests'
          }
          }
       stage("Test") {
