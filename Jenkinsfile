@@ -1,56 +1,42 @@
-pipeline
-{
-    agent any
-  tools{
-        maven '3.9.2'
-    }
+pipeline {
+   agent any
 
-    environment {
-        registry = "lorenajessica/spring-jenkins"
-        registryCredential = 'lorenajessica_docker_hub'
-        dockerImage = ''
-    }
-    stages
-    {
-        stages{
-               stage('Build Maven'){
-                   steps{
-                       checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'jessicagumbe', url: 'https://github.com/jessicagumbe/jenkins']])
-                       sh 'mvn clean install -DskipTests'
-                   }
-               }
+   tools {
+      // Install the Maven version configured as "M3" and add it to the path.
+      maven "M3"
+   }
 
-
-         stage('Build image'){
-                  steps{
-                      script{
-                          dockerImage = docker.build registry + ":$BUILD_NUMBER"
-                      }
-                  }
+   stages {
+      stage('Build') {
+         steps {
+            // Get some code from a GitHub repository
+           // git 'https://github.com/jglick/simple-maven-project-with-tests.git'
+            sh "mvn -Dmaven.test.failure.ignore=true clean compile"
          }
-
-      stage('Build conteiner'){
-          steps{
-               sh "docker run --name spring-jenkins -p 8081:8081   -d --restart unless-stopped lorenajessica/spring-jenkins:"+"$BUILD_NUMBER"
-
+         }
+      stage("Test") {
+          steps {
+           // git 'https://github.com/jglick/simple-maven-project-with-tests.git'
+            sh "mvn -Dmaven.test.failure.ignore=true clean test"
 
           }
+
+      }
+      stage("Deploy") {
+          steps {
+           // git 'https://github.com/jglick/simple-maven-project-with-tests.git'
+            sh "mvn -Dmaven.test.failure.ignore=true clean install"
+
+          }
+          post {
+              success {
+                  archiveArtifacts 'target/*.jar'
+              }
+
+          }
+
+
       }
 
-
-     stage('Push image'){
-         steps{
-             script{
-                   docker.withRegistry( '', registryCredential ) {
-                     dockerImage.push()
-                   }
-             }
-        }
-            }
-post {
-        always {
-              bat 'docker logout'
-        }
-    }
-
-}
+      }
+   }
