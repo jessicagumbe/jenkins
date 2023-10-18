@@ -4,38 +4,45 @@ pipeline
 
     stages
     {
-        stage('Build')
-        {
-            steps
-            {
-                echo 'Build App'
-            }
-        }
+        stages{
+               stage('Build Maven'){
+                   steps{
+                       checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'jessicagumbe', url: 'https://github.com/jessicagumbe/jenkins']])
+                       sh 'mvn clean install -DskipTests'
+                   }
+               }
 
-        stage('Test')
-        {
-            steps
-            {
-                echo 'Test App'
-            }
-        }
 
-        stage('Deploy')
-        {
-            steps
-            {
-                echo 'Deploy App'
+         stage('Build image'){
+                  steps{
+                      script{
+                          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                      }
+                  }
+         }
+
+      stage('Build conteiner'){
+          steps{
+               sh "docker run --name spring-jenkins -p 8081:8081   -d --restart unless-stopped lorenajessica/spring-jenkins:"+"$BUILD_NUMBER"
+
+
+          }
+      }
+
+
+     stage('Push image'){
+         steps{
+             script{
+                   docker.withRegistry( '', registryCredential ) {
+                     dockerImage.push()
+                   }
+             }
+        }
             }
+post {
+        always {
+              bat 'docker logout'
         }
     }
 
-    post
-    {
-
-    	always
-    	{
-    		emailext body: 'Summary', subject: 'Pipeline Status', to: 'lorenajessica0211@gmail.com'
-    	}
-
-    }
 }
