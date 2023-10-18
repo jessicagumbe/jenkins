@@ -1,7 +1,15 @@
 pipeline
 {
     agent any
+  tools{
+        maven '3.9.2'
+    }
 
+    environment {
+        registry = "lorenajessica/spring-jenkins"
+        registryCredential = 'lorenajessica_docker_hub'
+        dockerImage = ''
+    }
     stages
     {
         stages{
