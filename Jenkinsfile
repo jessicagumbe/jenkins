@@ -1,39 +1,13 @@
 pipeline {
-   agent any
-    tools{
-        maven '3.9.2'
+  agent any
+  stages {
+    stage("Build") {
+      steps {
+        git url: 'https://github.com/cyrille-leclerc/multi-module-maven-project'
+        withMaven {
+          sh "mvn clean verify"
+        } // withMaven will discover the generated Maven artifacts, JUnit Surefire & FailSafe reports and FindBugs reports
+      }
     }
-   stages {
-      stage('Build') {
-         steps {
-            // Get some code from a GitHub repository
-            checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'jessicagumbe_github', url: 'https://github.com/jessicagumbe/jenkins']])
-            bat 'mvn clean install -DskipTests'
-         }
-         }
-      stage("Test") {
-          steps {
-           // git 'https://github.com/jglick/simple-maven-project-with-tests.git'
-            bat "mvn -Dmaven.test.failure.ignore=true clean test"
-
-          }
-
-      }
-      stage("Deploy") {
-          steps {
-           // git 'https://github.com/jglick/simple-maven-project-with-tests.git'
-            sh "mvn -Dmaven.test.failure.ignore=true clean install"
-
-          }
-          post {
-              success {
-                  archiveArtifacts 'target/*.jar'
-              }
-
-          }
-
-
-      }
-
-      }
-   }
+  }
+}
