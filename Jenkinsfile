@@ -5,7 +5,7 @@ pipeline {
          steps {
             // Get some code from a GitHub repository
             git 'https://github.com/jessicagumbe/jenkins.git'
-            sh "mvn -Dmaven.test.failure.ignore=true clean compile"
+            bat "mvn -Dmaven.test.failure.ignore=true clean compile"
          }
          }
       stage("Test") {
