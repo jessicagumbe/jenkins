@@ -6,7 +6,7 @@ pipeline {
      stages {
         stage('Test') {
             steps {
-                git 'https://github.com/user/projectDemo.git'
+                git 'https://github.com/jessicagumbe/jenkins.git'
                 sh 'mvn test'
                 archiveArtifacts artifacts: 'target/surefire-reports/**'
             }
