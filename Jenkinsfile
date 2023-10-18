@@ -1,11 +1,14 @@
 pipeline {
    agent any
+     tools{
+           maven '3.9.2'
+       }
    stages {
       stage('Build') {
          steps {
             // Get some code from a GitHub repository
             checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: 'developer_github', url: 'https://github.com/jessicagumbe/jenkins']])
-            bat 'mvn clean install -DskipTests'
+            bat 'mvn -Dmaven.test.failure.ignore=true clean compile'
          }
          }
       stage("Test") {
